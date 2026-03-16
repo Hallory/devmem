@@ -11,7 +11,7 @@ class ProjectRecord:
     name: str
     
     
-def get_project_by_root_path(root_path:str)->ProjectRecord | None:
+def get_project_by_root_path(root_path:str)->ProjectRecord:
     conn = get_connection()
     cursor = conn.cursor()
     

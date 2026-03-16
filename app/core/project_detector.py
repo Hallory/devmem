@@ -19,7 +19,7 @@ class DetectedProject:
     detection_marker: str
     
 
-def detect_project(start_path: Path) -> DetectedProject | None:
+def detect_project(start_path: Path) -> DetectedProject:
     current = start_path.resolve()
     
     for candidate in [current, *current.parents]:

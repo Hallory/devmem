@@ -1,7 +1,7 @@
 from pathlib import Path
 from dataclasses import dataclass
 
-from app.core.file_snapshot import compute_file_hash,scan_python_files
+from app.core.file_snapshot import compute_file_hash, scan_python_files
 from app.storage.db import get_connection
 
 
@@ -52,7 +52,7 @@ def save_snapshot_for_run(run_id:int, project_id:int,project_root:Path)->int:
         create_file_snapshot(
             run_id=run_id,
             project_id=project_id,
-            file_path=str(path),
+            file_path=str(path.relative_to(project_root)),
             content_hash=content_hash
         )
         saved_count += 1
