@@ -360,3 +360,51 @@ def get_last_error_for_project(project_id:int)->Optional[ErrorRecord]:
         followup_error_id=row[10],
         resolved_by_run_id=row[11],
     )
+    
+    
+def get_errors_for_project(project_id:int)->list[ErrorRecord]:
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT
+            id,
+            run_id,
+            project_id,
+            file_path,
+            line_number,
+            error_type,
+            message,
+            traceback,
+            fingerprint,
+            status,
+            followup_error_id,
+            resolved_by_run_id
+        FROM errors
+        WHERE project_id = ?
+        ORDER BY id ASC
+        """,
+        (project_id,),
+    )
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    return [
+        ErrorRecord(
+            id=row[0],
+            run_id=row[1],
+            project_id=row[2],
+            file_path=row[3],
+            line_number=row[4],
+            error_type=row[5],
+            message=row[6],
+            traceback=row[7],
+            fingerprint=row[8],
+            status=row[9],
+            followup_error_id=row[10],
+            resolved_by_run_id=row[11],
+        )
+        for row in rows
+    ]

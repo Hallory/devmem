@@ -1,33 +1,38 @@
-import sys 
+import sys
 from pathlib import Path
 
 from app.analysis.fix_context import build_fix_context
 from app.runner.command_runner import run_command
 from app.storage.db import init_db
 from app.core.project_detector import detect_project
-from app.storage.error_repository import get_last_error_for_project
-from app.storage.project_repository import get_project_by_root_path
+from app.storage.error_repository import (
+    get_last_error_for_project,
+    get_errors_for_project,
+)
+from app.storage.project_repository import get_project_by_root_path, ProjectRecord
+from app.storage.run_repository import get_runs_for_project
 
 def print_usage() -> None:
     print("Usage:")
     print("  devmem run <command> [args...]")
     print("  devmem fix-context --error-id <id>")
     print("  devmem fix-context --last")
+    print("  devmem errors")
 
 
-def print_file_group(title:str, files:list[str])->None:
+def print_file_group(title: str, files: list[str]) -> None:
     print(f"    {title}:")
     if not files:
-        print("     - none")
+        print("      - none")
         return
-    
-    for file_path in files:
-        print(f"     - {file_path}")
 
-    
-def print_fix_context(error_id:int)->None:
+    for file_path in files:
+        print(f"      - {file_path}")
+
+
+def print_fix_context(error_id: int) -> None:
     context = build_fix_context(error_id)
-    
+
     if context is None:
         print(f"Fix context not found for error id: {error_id}")
         return
@@ -41,47 +46,96 @@ def print_fix_context(error_id:int)->None:
     print(f"  next_run_exit_code: {context.next_run_exit_code}")
     print(f"  next_run_state: {context.next_run_state}")
     print("  changed_files:")
-    print_file_group("added ", context.changed_files['added'])
-    print_file_group("removed ", context.changed_files['removed'])
-    print_file_group("changed ", context.changed_files['changed'])
-    
-    
-def print_last_fix_context()->None:
+    print_file_group("added", context.changed_files["added"])
+    print_file_group("removed", context.changed_files["removed"])
+    print_file_group("changed", context.changed_files["changed"])
+
+
+def get_current_project()-> ProjectRecord | None:
     cwd = Path.cwd()
-    project_root = detect_project(cwd)
-    
-    project = get_project_by_root_path(str(project_root.root_path)) 
+    detected_project = detect_project(cwd)
+    return get_project_by_root_path(str(detected_project.root_path))
+
+
+def print_last_fix_context() -> None:
+    project = get_current_project()
     if project is None:
         print("Current project is not registered in devmem yet")
         return
-    
+
     last_error = get_last_error_for_project(project.id)
     if last_error is None:
         print("No errors found for current project")
         return
-    
+
     print_fix_context(last_error.id)
 
-def main() ->None:
+
+def print_errors() -> None:
+    project = get_current_project()
+    if project is None:
+        print("Current project is not registered in devmem yet")
+        return
+
+    errors = get_errors_for_project(project.id)
+    if not errors:
+        print(f"No errors found for project: {project.name}")
+        return
+
+    print(f"Errors for project: {project.name}")
+    print()
+
+    for error in errors:
+        print(
+            f"- id={error.id:<4} | "
+            f"run={error.run_id:<4} | "
+            f"status={error.status:<28} | "
+            f"{error.fingerprint}"
+        )
+
+
+
+def print_runs()->None:
+    project = get_current_project()
+    if project is None:
+        print("Current project is not registered in devmem yet")
+        return
+    
+    runs = get_runs_for_project(project.id)
+    if not runs:
+        print(f"No runs found for project: {project.name}")
+        return
+
+    print(f"Runs for project: {project.name}")
+    print()
+
+    for run in runs:
+        print(
+            f"- id={run.id:<4} | "
+            f"exit={run.exit_code:<3} | "
+            f"duration={run.duration_ms:<6}ms | "
+            f"{run.command}"
+        )
+
+def main() -> None:
     init_db()
     args = sys.argv[1:]
 
     if not args:
         print_usage()
         return
-    
+
     command_name = args[0]
-    
+
     if command_name == "run":
         if len(args) < 2:
             print_usage()
             return
-        
+
         command = args[1:]
         run_command(command)
         return
-    
-    
+
     if command_name == "fix-context":
         if len(args) == 2 and args[1] == "--last":
             print_last_fix_context()
@@ -98,6 +152,14 @@ def main() ->None:
             return
 
         print_usage()
+        return
+
+    if command_name == "errors":
+        print_errors()
+        return
+    
+    if command_name == "runs":
+        print_runs()
         return
 
     print(f"Unknown command: {command_name}")

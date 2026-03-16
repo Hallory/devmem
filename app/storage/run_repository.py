@@ -154,3 +154,47 @@ def get_next_run(project_id:int, run_id:int)->Optional[RunRecord]:
         stdout=row[8],
         stderr=row[9],
     )
+    
+    
+def get_runs_for_project(project_id:int)->list[RunRecord]:
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT
+            id,
+            project_id,
+            command,
+            cwd,
+            started_at,
+            finished_at,
+            duration_ms,
+            exit_code,
+            stdout,
+            stderr
+        FROM runs
+        WHERE project_id = ?
+        ORDER BY id ASC
+        """,
+        (project_id,),
+    )
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    return [
+        RunRecord(
+            id=row[0],
+            project_id=row[1],
+            command=row[2],
+            cwd=row[3],
+            started_at=row[4],
+            finished_at=row[5],
+            duration_ms=row[6],
+            exit_code=row[7],
+            stdout=row[8],
+            stderr=row[9],
+        )
+        for row in rows
+    ]
