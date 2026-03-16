@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging / build
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Test / coverage / tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Local databases and runtime data
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+*.db
+*.sqlite
+*.sqlite3
+
+# Optional logs / temp runtime files
+*.log
+tmp/
+temp/
+
+# Node / frontend artifacts (на будущее, если появится UI)
+node_modules/
+coverage/
+.next/
+out/
+dist-frontend/
+
+# Tauri / Electron builds (на будущее)
+src-tauri/target/
+target/
+
+# Screenshots / generated artifacts / local captures
+screenshots/
+captures/
+artifacts/
+
+# Local model files / weights / downloads
+models/
+checkpoints/
+downloads/
