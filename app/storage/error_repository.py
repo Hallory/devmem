@@ -211,3 +211,101 @@ def mark_error_followup(
 
     conn.commit()
     conn.close()
+    
+    
+    
+    
+def get_error_by_id(error_id:int)->Optional[ErrorRecord]:
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT
+            id,
+            run_id,
+            project_id,
+            file_path,
+            line_number,
+            error_type,
+            message,
+            traceback,
+            fingerprint,
+            status,
+            followup_error_id,
+            resolved_by_run_id
+        FROM errors
+        WHERE id = ?
+        """,
+        (error_id,),
+    )
+
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    return ErrorRecord(
+        id=row[0],
+        run_id=row[1],
+        project_id=row[2],
+        file_path=row[3],
+        line_number=row[4],
+        error_type=row[5],
+        message=row[6],
+        traceback=row[7],
+        fingerprint=row[8],
+        status=row[9],
+        followup_error_id=row[10],
+        resolved_by_run_id=row[11],
+    )
+    
+    
+def get_error_by_run_id(run_id:int)->Optional[ErrorRecord]:
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT
+            id,
+            run_id,
+            project_id,
+            file_path,
+            line_number,
+            error_type,
+            message,
+            traceback,
+            fingerprint,
+            status,
+            followup_error_id,
+            resolved_by_run_id
+        FROM errors
+        WHERE run_id = ?
+        ORDER BY id ASC
+        LIMIT 1
+        """,
+        (run_id,),
+    )
+
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    return ErrorRecord(
+        id=row[0],
+        run_id=row[1],
+        project_id=row[2],
+        file_path=row[3],
+        line_number=row[4],
+        error_type=row[5],
+        message=row[6],
+        traceback=row[7],
+        fingerprint=row[8],
+        status=row[9],
+        followup_error_id=row[10],
+        resolved_by_run_id=row[11],
+    )
