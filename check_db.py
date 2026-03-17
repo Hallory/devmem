@@ -1,9 +1,7 @@
 import sqlite3
 from pathlib import Path
 from app.storage.db import DB_PATH
-from app.storage.file_snapshot_repository import get_changed_files_between_runs
 
-print(get_changed_files_between_runs(14,15))
 def print_table(cursor, table_name):
     print(f"\n===== {table_name.upper()} =====")
 
