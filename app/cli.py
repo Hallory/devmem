@@ -8,9 +8,10 @@ from app.core.project_detector import detect_project
 from app.storage.error_repository import (
     get_last_error_for_project,
     get_errors_for_project,
+    get_error_by_id,
 )
 from app.storage.project_repository import get_project_by_root_path, ProjectRecord
-from app.storage.run_repository import get_runs_for_project
+from app.storage.run_repository import get_runs_for_project, get_run_by_id
 
 def print_usage() -> None:
     print("Usage:")
@@ -18,6 +19,9 @@ def print_usage() -> None:
     print("  devmem fix-context --error-id <id>")
     print("  devmem fix-context --last")
     print("  devmem errors")
+    print("  devmem projects")
+    print("  devmem show-run --id <id>")
+    print("  devmem show-error --id <id>")
 
 
 def print_file_group(title: str, files: list[str]) -> None:
@@ -116,6 +120,60 @@ def print_runs()->None:
             f"duration={run.duration_ms:<6}ms | "
             f"{run.command}"
         )
+        
+        
+def print_run(run_id:int)->None:
+    run = get_run_by_id(run_id)
+    
+    if run is None:
+        print(f"Run not found: {run_id}")
+        return
+    
+    print(f"Run: {run_id}")
+    print()
+    print(f"command: {run.command}")
+    print(f"cwd: {run.cwd}")
+    print(f"exit_code: {run.exit_code}")
+    print(f"duration: {run.duration_ms}")
+    print(f"started_at: {run.started_at}")
+    print(f"finished_at: {run.finished_at}")
+    print()
+
+    print("stdout:")
+    print(run.stdout or "<empty>")
+    print()
+
+    print("stderr:")
+    print(run.stderr or "<empty>")
+    
+
+
+def print_error(error_id:int)->None:
+    error = get_error_by_id(error_id)
+
+    if error is None:
+        print(f"Error not found: {error_id}")
+        return
+
+    print(f"Error: {error_id}")
+    print()
+    print(f"run_id: {error.run_id}")
+    print(f"status: {error.status}")
+    print(f"fingerprint: {error.fingerprint}")
+    print(f"command: {error.command}")
+    print(f"cwd: {error.cwd}")
+    print(f"exit_code: {error.exit_code}")
+    print(f"duration: {error.duration_ms}")
+    print(f"started_at: {error.started_at}")
+    print(f"finished_at: {error.finished_at}")
+    print()
+
+    print("stdout:")
+    print(error.stdout or "<empty>")
+    print()
+
+    print("stderr:")
+    print(error.stderr or "<empty>")
 
 def main() -> None:
     init_db()
@@ -161,6 +219,29 @@ def main() -> None:
     if command_name == "runs":
         print_runs()
         return
+    
+    if command_name == "show-run":
+        if len(args) == 3 and args[1] == "--id":
+            try:
+                run_id = int(args[2])
+            except ValueError:
+                print("run_id must be an integer")
+                return
+
+            print_run(run_id)
+            return
+        
+    
+    if command_name == "show-error":
+        if len(args) == 3 and args[1] == "--id":
+            try:
+                error_id = int(args[2])
+            except ValueError:
+                print("error_id must be an integer")
+                return
+
+            print_error(error_id)
+            return
 
     print(f"Unknown command: {command_name}")
     print_usage()
