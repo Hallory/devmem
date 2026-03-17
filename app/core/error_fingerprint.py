@@ -13,7 +13,7 @@ def normalize_error_message(
 
     normalized = message
 
-    if error_type != "SyntaxError":
+    if error_type not in {"SyntaxError", "IndentationError", "TabError"}:
         normalized = re.sub(r"'[^']*'", "<str>", normalized)
         normalized = re.sub(r'"[^"]*"', "<str>", normalized)
 
