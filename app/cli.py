@@ -158,23 +158,25 @@ def print_error(error_id:int)->None:
     print(f"Error: {error_id}")
     print()
     print(f"run_id: {error.run_id}")
-    print(f"status: {error.status}")
+    print(f"project_id: {error.project_id}")
+    print(f"line_number: {error.line_number}")
+    print(f"error_type: {error.error_type}")
+    print(f"message: {error.message}")
     print(f"fingerprint: {error.fingerprint}")
-    print(f"command: {error.command}")
-    print(f"cwd: {error.cwd}")
-    print(f"exit_code: {error.exit_code}")
-    print(f"duration: {error.duration_ms}")
-    print(f"started_at: {error.started_at}")
-    print(f"finished_at: {error.finished_at}")
+    print(f"status: {error.status}")
+    print(
+        f"followup_error_id: "
+        f"{error.followup_error_id if error.followup_error_id is not None else '<none>'}" 
+    )
+    print(
+        f"resolved_by_run_id: "
+        f"{error.resolved_by_run_id if error.resolved_by_run_id is not None else '<none>'}" 
+    )
     print()
-
-    print("stdout:")
-    print(error.stdout or "<empty>")
-    print()
-
-    print("stderr:")
-    print(error.stderr or "<empty>")
-
+    print("traceback:")
+    print(error.traceback or "<empty>")
+    
+    
 def main() -> None:
     init_db()
     args = sys.argv[1:]
